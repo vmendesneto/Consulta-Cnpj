@@ -85,12 +85,36 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
           child: const Icon(Icons.download),
         ));
   }
-
   void onSelected(BuildContext context, int item) {
     switch (item) {
-      case 0:
-        _deleteDatabase();
+      case 0: // Excluir banco de dados foi selecionado
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Confirmar'),
+              content: Text('Tem certeza que deseja excluir o banco de dados?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Fecha o diálogo
+                  },
+                  child: Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _deleteDatabase();
+                    print('Banco de dados excluído');
+                    Navigator.of(context).pop(); // Fecha o diálogo
+                  },
+                  child: Text('Excluir'),
+                ),
+              ],
+            );
+          },
+        );
         break;
+    // Adicione mais cases aqui para outros itens do menu, se necessário
     }
   }
 

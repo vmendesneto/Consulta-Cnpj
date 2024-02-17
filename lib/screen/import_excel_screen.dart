@@ -69,27 +69,6 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                   : 'Selecionar Arquivo Excel'),
             ),
             const SizedBox(height: 20),
-            // Espaço entre os botões
-            // ElevatedButton(
-            //   onPressed: _isUpdating
-            //       ? null
-            //       : () async {
-            //           setState(() {
-            //             _isUpdating = true;
-            //           });
-            //           await fetchInfoForClientesAndUpdate();
-            //           setState(() {
-            //             _isUpdating = false;
-            //           });
-            //           ScaffoldMessenger.of(context).showSnackBar(
-            //             const SnackBar(
-            //                 content: Text('Clientes atualizados com sucesso!')),
-            //           );
-            //         },
-            //   child: Text(_isUpdating
-            //       ? 'Atualizando...'
-            //       : 'Atualizar Informações dos Clientes'),
-            // ),
 
             ElevatedButton(
               onPressed: () {
@@ -98,7 +77,7 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                   MaterialPageRoute(builder: (context) => ClientesInfoScreen()),
                 );
               },
-              child: const Text('Ver Todos os Clientes'),
+              child: const Text('Ver Todos os CNPJ salvos'),
             ),
           ],
         ),
