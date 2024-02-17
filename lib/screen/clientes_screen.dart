@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../banco_dados/bd.dart';
+import '../carregar_cnpj.dart';
 import '../model/cnpj_model.dart';
 import '../saida_excel/export_excel.dart';
 
@@ -30,6 +31,10 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
                 PopupMenuItem<int>(
                   value: 0,
                   child: Text('Excluir banco de dados'),
+                ),
+                PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('Atualizar'),
                 ),
               ],
             ),
@@ -85,6 +90,7 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
           child: const Icon(Icons.download),
         ));
   }
+
   void onSelected(BuildContext context, int item) {
     switch (item) {
       case 0: // Excluir banco de dados foi selecionado
@@ -114,7 +120,56 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
           },
         );
         break;
-    // Adicione mais cases aqui para outros itens do menu, se necessário
+      case 1:
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            // Define a variável de status fora do StatefulBuilder
+            bool status = false;
+
+            // Retorna o AlertDialog dentro de um StatefulBuilder
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setStateDialog) {
+                return AlertDialog(
+                  title: Text('Confirmar'),
+                  content: Text('Tem certeza que deseja atualizar os dados?'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: status
+                          ? null
+                          : () {
+                              Navigator.of(context).pop(); // Fecha o diálogo
+                            },
+                      child: Text(status ? " " : 'Cancelar'),
+                    ),
+                    TextButton(
+                      onPressed: status
+                          ? null
+                          : () async {
+                              // Atualiza o estado dentro do diálogo
+                              setStateDialog(() {
+                                status = true;
+                              });
+
+                              await fetchInfoForClientesAndUpdate();
+
+                              // Atualiza o estado para indicar que o processamento terminou
+                              setStateDialog(() {
+                                status = false;
+                              });
+                              print('Dados atualizados com sucesso');
+                              Navigator.of(context)
+                                  .pop(); // Fecha o diálogo após a atualização
+                            },
+                      child: Text(status ? "Processando...." : "Atualizar"),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+        break;
     }
   }
 

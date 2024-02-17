@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:io';
-
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import '../banco_dados/bd.dart';
 import '../carregar_cnpj.dart';
-import '../entrada_excel/import_excel.dart';
+import '../model/cnpj_model.dart';
 import 'clientes_screen.dart';
+import 'lote_screen.dart';
 
 class ExcelImportScreen extends StatefulWidget {
   @override
@@ -12,24 +12,11 @@ class ExcelImportScreen extends StatefulWidget {
 }
 
 class _ExcelImportScreenState extends State<ExcelImportScreen> {
-  bool _isUpdating = false;
+  bool _isInsert = false;
 
-  Future<bool> _pickExcelFile() async {
-    // Abre o seletor de arquivos e permite apenas arquivos Excel
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['xlsx', 'xls'],
-    );
+  // Criando o controller com a máscara de CNPJ
+  var _cnpjController = MaskedTextController(mask: '00.000.000/0000-00');
 
-    if (result != null) {
-      File file = File(result.files.single.path!);
-      await importExcel(file);
-      return true; // Arquivo foi selecionado
-    } else {
-      print("Nenhum arquivo selecionado.");
-      return false; // Nenhum arquivo foi selecionado
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,39 +24,92 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
       appBar: AppBar(
         title: const Text('Consultar Cnpj na Receita'),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            ElevatedButton(
-              onPressed: _isUpdating
-                  ? null
-                  : () async {
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _cnpjController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        hintText: 'Digite um CNPJ',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        // Remove os caracteres não numéricos para validar
+                        String digits = value!.replaceAll(RegExp(r'\D'), '');
+                        if (digits.length != 14) {
+                          return 'O CNPJ precisa ter 14 números';
+                        }
+                        return null; // Retorna null se o valor passar na validação
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _isInsert
+                        ? null
+                        : () async {
                       setState(() {
-                        _isUpdating = true;
+                        _isInsert = true;
                       });
-                      bool filePicked = await _pickExcelFile();
-                      if (filePicked) {
+                      // Verifica se o campo do CNPJ é válido
+                      if (_cnpjController.text.length == 18) {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        String cnpj = _cnpjController.text.replaceAll(".", "")
+                            .replaceAll("/", "")
+                            .replaceAll("-", "");
+                        await DatabaseHelper.instance.insertCnpj(
+                            Cliente(cnpj: cnpj));
                         await fetchInfoForClientesAndUpdate();
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('CNPJ atualizados com sucesso!')),
+                              content: Text(
+                                  'CNPJ inserido e atualizado com sucesso!')),
                         );
                         setState(() {
-                          _isUpdating = false;
+                          _isInsert = false;
                         });
                       } else {
                         setState(() {
-                          _isUpdating = false;
+                          _isInsert = false;
                         });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text(
+                              'CNPJ inválido. Insira 14 números.')),
+                        );
                       }
                     },
-              child: Text(_isUpdating
-                  ? 'Processando.....'
-                  : 'Selecionar Arquivo Excel'),
+                    child: Text(_isInsert
+                        ? 'Inserindo'
+                        : 'Buscar'),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => loteScreen()),
+                );
+              },
+              child: const Column(
+                children: [
+                  Text('Inserir CNPJs em Lote'),
+                  Text('(Arquivo no formato Excel)',
+                      style: TextStyle(fontSize: 8)),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
-
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -84,4 +124,5 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
       ),
     );
   }
+
 }
