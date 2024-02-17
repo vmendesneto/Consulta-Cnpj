@@ -23,13 +23,11 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
       File file = File(result.files.single.path!);
       importExcel(file);
     } else {
-      // O usuário cancelou a seleção
       print("Nenhum arquivo selecionado.");
     }
   }
 
   bool _isUpdating = false;
-  bool _isImportExcel = false;
 
   @override
   Widget build(BuildContext context) {

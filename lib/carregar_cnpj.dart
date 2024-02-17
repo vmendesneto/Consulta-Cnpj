@@ -10,7 +10,7 @@ Future<List<Cliente>> fetchClientes() async {
 
   return List.generate(maps.length, (i) {
     return Cliente(
-      id: maps[i]['id'],
+      //id: maps[i]['id'],
       cnpj: maps[i]['cnpj'],
     );
   });
@@ -24,25 +24,22 @@ Future<void> fetchInfoForClientesAndUpdate() async {
     var response = await http.get(url);
 
     if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      String situacao = data['descricao_situacao_cadastral'];
-      String dataCadastro = data['data_situacao_cadastral'];
-      // Atualiza a situação no banco de dados
-      await updateSituacao(cliente.cnpj, situacao, dataCadastro);
+      var data = jsonDecode(utf8.decode(response.bodyBytes));
+      Cliente updatedCliente = Cliente.fromMap(data);
+      await updateSituacao(updatedCliente);
     } else {
       print('Falha na requisição para o CNPJ: ${cliente.cnpj}');
     }
   }
 }
-Future<void> updateSituacao(String cnpj, String situacao, String dataCadastro) async {
+
+Future<void> updateSituacao(Cliente cliente) async {
   final db = await DatabaseHelper.instance.database;
 
   await db.update(
     'cliente_table',
-    {'situacao': situacao,
-    'dataCadastro': dataCadastro,
-    },
+    cliente.toMap(),
     where: 'cnpj = ?',
-    whereArgs: [cnpj],
+    whereArgs: [cliente.cnpj],
   );
 }
