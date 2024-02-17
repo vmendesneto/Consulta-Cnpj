@@ -1,7 +1,8 @@
+import 'package:consulta_cnpj/screen/import_excel_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MaterialApp(home: ExcelImportScreen()));
 }
 
 class MyApp extends StatelessWidget {
