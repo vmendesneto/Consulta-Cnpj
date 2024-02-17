@@ -40,7 +40,24 @@ class DatabaseHelper {
 
   // Método para inserir um usuário
   Future<int> insertCnpj(Cliente cliente) async {
-    Database db = await instance.database;
+    final Database db = await instance.database;
+
+    // Verifica se o cliente já existe no banco de dados.
+    // Supondo que 'cnpj' seja a coluna que armazena o CNPJ do cliente na sua tabela.
+    final List<Map<String, dynamic>> existing = await db.query(
+      table, // Substitua 'table' pelo nome real da sua tabela.
+      where: 'cnpj = ?', // Substitua 'cnpj' pelo nome real da coluna, se for diferente.
+      whereArgs: [cliente.cnpj],
+    );
+
+    // Se 'existing' não estiver vazio, o cliente já existe e não será inserido novamente.
+    if (existing.isNotEmpty) {
+      // Retorna algum valor ou lança uma exceção, dependendo de como você quer lidar com essa situação.
+    print("já cadastrado no banco de dados");
+      return 0;
+    }
+
+    // Se o cliente não existe, insere-o no banco de dados.
     return await db.insert(table, cliente.toMap());
   }
   Future<List<Cliente>> getClientes() async {
@@ -60,5 +77,12 @@ class DatabaseHelper {
   Future<void> close() async {
     final db = await instance.database;
     db.close();
+  }
+  Future<void> deleteDatabase() async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'MyDatabase.db');
+
+    await databaseFactory.deleteDatabase(path);
+    _database = null; // Resetar a referência ao banco de dados
   }
 }

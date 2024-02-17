@@ -27,15 +27,15 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
       print("Nenhum arquivo selecionado.");
     }
   }
-  void fetchInfoFor() async {
-    print('Atualizando informações dos clientes...');
-    await fetchInfoForClientesAndUpdate();
-  }
+
+  bool _isUpdating = false;
+  bool _isImportExcel = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Importar Excel'),
+        title: const Text('Consultar Cnpj na Receita'),
       ),
       body: Center(
         child: Column(
@@ -46,10 +46,27 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
               child: const Text('Selecionar Arquivo Excel'),
             ),
             const SizedBox(height: 20), // Espaço entre os botões
-            const ElevatedButton(
-              onPressed: fetchInfoForClientesAndUpdate,
-              child: Text('Atualizar Informações dos Clientes'),
+            ElevatedButton(
+              onPressed: _isUpdating
+                  ? null
+                  : () async {
+                      setState(() {
+                        _isUpdating = true;
+                      });
+                      await fetchInfoForClientesAndUpdate();
+                      setState(() {
+                        _isUpdating = false;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Clientes atualizados com sucesso!')),
+                      );
+                    },
+              child: Text(_isUpdating
+                  ? 'Atualizando...'
+                  : 'Atualizar Informações dos Clientes'),
             ),
+
             ElevatedButton(
               onPressed: () {
                 Navigator.push(

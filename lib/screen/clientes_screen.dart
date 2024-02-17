@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// Importe seu helper de banco de dados e o modelo de cliente aqui
 import '../banco_dados/bd.dart';
 import '../model/cnpj_model.dart';
 import '../saida_excel/export_excel.dart';
@@ -23,6 +22,17 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Informações dos Clientes'),
+          actions: <Widget>[
+      PopupMenuButton<int>(
+      onSelected: (item) => onSelected(context, item),
+    itemBuilder: (context) => [
+    PopupMenuItem<int>(
+    value: 0,
+    child: Text('Excluir banco de dados'),
+    ),
+    ],
+      ),
+      ],
       ),
       body: FutureBuilder<List<Cliente>>(
         future: futureClientes,
@@ -59,4 +69,24 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
         )
     );
   }
+
+void onSelected(BuildContext context, int item) {
+  switch (item) {
+    case 0:
+      _deleteDatabase();
+      break;
+  }
+}
+void _deleteDatabase() async {
+  // Aqui, implemente a lógica para excluir o banco de dados
+  await DatabaseHelper.instance.deleteDatabase();
+  // Exibir uma mensagem de confirmação
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Banco de dados excluído com sucesso!')),
+  );
+  // Atualizar o estado para refletir a exclusão no UI, se necessário
+  setState(() {
+    futureClientes = DatabaseHelper.instance.getClientes();
+  });
+}
 }
