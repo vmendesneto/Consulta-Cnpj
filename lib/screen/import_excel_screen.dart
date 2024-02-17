@@ -12,7 +12,9 @@ class ExcelImportScreen extends StatefulWidget {
 }
 
 class _ExcelImportScreenState extends State<ExcelImportScreen> {
-  void _pickExcelFile() async {
+  bool _isUpdating = false;
+
+  Future<bool> _pickExcelFile() async {
     // Abre o seletor de arquivos e permite apenas arquivos Excel
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -21,13 +23,13 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
 
     if (result != null) {
       File file = File(result.files.single.path!);
-      importExcel(file);
+      await importExcel(file);
+      return true; // Arquivo foi selecionado
     } else {
       print("Nenhum arquivo selecionado.");
+      return false; // Nenhum arquivo foi selecionado
     }
   }
-
-  bool _isUpdating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,30 +42,54 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: _pickExcelFile,
-              child: const Text('Selecionar Arquivo Excel'),
-            ),
-            const SizedBox(height: 20), // Espaço entre os botões
-            ElevatedButton(
               onPressed: _isUpdating
                   ? null
                   : () async {
                       setState(() {
                         _isUpdating = true;
                       });
-                      await fetchInfoForClientesAndUpdate();
-                      setState(() {
-                        _isUpdating = false;
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Clientes atualizados com sucesso!')),
-                      );
+                      bool filePicked = await _pickExcelFile();
+                      if (filePicked) {
+                        await fetchInfoForClientesAndUpdate();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('CNPJ atualizados com sucesso!')),
+                        );
+                        setState(() {
+                          _isUpdating = false;
+                        });
+                      } else {
+                        setState(() {
+                          _isUpdating = false;
+                        });
+                      }
                     },
               child: Text(_isUpdating
-                  ? 'Atualizando...'
-                  : 'Atualizar Informações dos Clientes'),
+                  ? 'Processando.....'
+                  : 'Selecionar Arquivo Excel'),
             ),
+            const SizedBox(height: 20),
+            // Espaço entre os botões
+            // ElevatedButton(
+            //   onPressed: _isUpdating
+            //       ? null
+            //       : () async {
+            //           setState(() {
+            //             _isUpdating = true;
+            //           });
+            //           await fetchInfoForClientesAndUpdate();
+            //           setState(() {
+            //             _isUpdating = false;
+            //           });
+            //           ScaffoldMessenger.of(context).showSnackBar(
+            //             const SnackBar(
+            //                 content: Text('Clientes atualizados com sucesso!')),
+            //           );
+            //         },
+            //   child: Text(_isUpdating
+            //       ? 'Atualizando...'
+            //       : 'Atualizar Informações dos Clientes'),
+            // ),
 
             ElevatedButton(
               onPressed: () {

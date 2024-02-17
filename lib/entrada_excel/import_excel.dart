@@ -2,9 +2,10 @@ import 'package:excel/excel.dart';
 import 'dart:io';
 
 import '../banco_dados/bd.dart';
+import '../carregar_cnpj.dart';
 import '../model/cnpj_model.dart';
 
-void importExcel(File file) async {
+Future importExcel(File file) async {
   var bytes = file.readAsBytesSync();
   var excel = Excel.decodeBytes(bytes);
 
@@ -26,6 +27,7 @@ void importExcel(File file) async {
           if(cleanedCnpj.length == 14){
           // CNPJ válido (apenas dígitos após limpeza), então chame o método para salvar no banco de dados
           await DatabaseHelper.instance.insertCnpj(Cliente(cnpj: cleanedCnpj));
+
         } else{
             print("CNPJ faltando numero: $cnpj");
           }
