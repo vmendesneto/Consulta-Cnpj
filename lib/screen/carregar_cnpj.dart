@@ -1,8 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import 'banco_dados/bd.dart';
-import 'model/cnpj_model.dart';
+import 'package:flutter/material.dart';
+import '../banco_dados/bd.dart';
+import '../model/cnpj_model.dart';
 
 Future<List<Cliente>> fetchClientes() async {
   final db = await DatabaseHelper.instance.database;
@@ -16,7 +16,7 @@ Future<List<Cliente>> fetchClientes() async {
   });
 }
 
-Future<void> fetchInfoForClientesAndUpdate() async {
+Future<void> fetchInfoForClientesAndUpdate(BuildContext context) async {
   List<Cliente> clientes = await fetchClientes();
 
   for (Cliente cliente in clientes) {
@@ -27,8 +27,23 @@ Future<void> fetchInfoForClientesAndUpdate() async {
       var data = jsonDecode(utf8.decode(response.bodyBytes));
       Cliente updatedCliente = Cliente.fromMap(data);
       await updateSituacao(updatedCliente);
-    } else {
-      print('Falha na requisição para o CNPJ: ${cliente.cnpj}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text(
+                'CNPJ inserido e atualizado com sucesso!')),
+      );
+    } else if (response.statusCode == 400) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content:
+            Text('CNPJ Inválido'),
+        duration: Duration(seconds: 4),
+      ));
+    }else{
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content:
+        Text('Sem conexão com a internet\n erro:${response.statusCode}'),
+        duration: const Duration(seconds: 4),
+      ));
     }
   }
 }

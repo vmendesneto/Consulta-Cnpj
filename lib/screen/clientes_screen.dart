@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../banco_dados/bd.dart';
-import '../carregar_cnpj.dart';
+import 'carregar_cnpj.dart';
 import '../model/cnpj_model.dart';
 import '../saida_excel/export_excel.dart';
 
@@ -23,23 +23,32 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Informações dos Clientes'),
+          backgroundColor: Colors.black,
+          title: const Text(
+            'Informações dos CNPJ',
+            style: TextStyle(color: Colors.amber),
+          ),
           actions: <Widget>[
+            IconButton(
+              icon: const Icon(
+                Icons.refresh,
+                color: Colors.amber,
+              ),
+              onPressed: () => _showUpdateDialog(context),
+            ),
             PopupMenuButton<int>(
+              color: Colors.amber,
               onSelected: (item) => onSelected(context, item),
               itemBuilder: (context) => [
-                PopupMenuItem<int>(
+                const PopupMenuItem<int>(
                   value: 0,
                   child: Text('Excluir banco de dados'),
-                ),
-                PopupMenuItem<int>(
-                  value: 1,
-                  child: Text('Atualizar'),
                 ),
               ],
             ),
           ],
         ),
+        backgroundColor: Colors.white,
         body: FutureBuilder<List<Cliente>>(
           future: futureClientes,
           builder: (context, snapshot) {
@@ -52,7 +61,10 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
                 itemBuilder: (context, index) {
                   Cliente cliente = snapshot.data![index];
                   return ListTile(
-                    title: Text("CNPJ: ${formatarCnpj(cliente.cnpj)}"),
+                    title: Text(
+                      "CNPJ: ${formatarCnpj(cliente.cnpj)}",
+                      style: const TextStyle(color: Colors.black),
+                    ),
                     // Mantém o CNPJ como título
                     subtitle: Text(
                       'Razão Social: ${cliente.razaoSocial ?? "Não informado"}\n'
@@ -67,27 +79,35 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
                       'Início Atividade: ${cliente.inicioAtividade ?? "Não informado"}\n'
                       'Situação Cadastral: ${cliente.situacaoCadastral ?? "Não informado"}\n'
                       'Data Atualização: ${cliente.dataCadastro ?? "Não informado"}',
+                      style: const TextStyle(color: Colors.black54),
                     ),
                     isThreeLine: true, // Permitir múltiplas linhas no subtitle
                   );
                 },
               );
             } else {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                  child: CircularProgressIndicator(
+                color: Colors.amber,
+              ));
             }
           },
         ),
         floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.black,
           onPressed: () async {
             await exportarClientesParaExcel();
             // Exibir uma mensagem de confirmação, se desejar
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                  content: Text('Clientes exportados para Excel com sucesso!')),
+                  content: Text('Clientes exportados em Excel na pasta Downloads com sucesso!')),
             );
           },
           tooltip: 'Exportar para Excel',
-          child: const Icon(Icons.download),
+          child: const Icon(
+            Icons.download,
+            color: Colors.amber,
+          ),
         ));
   }
 
@@ -98,14 +118,14 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Confirmar'),
-              content: Text('Tem certeza que deseja excluir o banco de dados?'),
+              title: const Text('Confirmar',style: TextStyle(color: Colors.red)),
+              content: const Text('Tem certeza que deseja excluir o banco de dados?'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop(); // Fecha o diálogo
                   },
-                  child: Text('Cancelar'),
+                  child: const Text('Cancelar',style: TextStyle(color: Colors.amber)),
                 ),
                 TextButton(
                   onPressed: () {
@@ -113,59 +133,9 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
                     print('Banco de dados excluído');
                     Navigator.of(context).pop(); // Fecha o diálogo
                   },
-                  child: Text('Excluir'),
+                  child: const Text('Excluir',style: TextStyle(color: Colors.red)),
                 ),
               ],
-            );
-          },
-        );
-        break;
-      case 1:
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            // Define a variável de status fora do StatefulBuilder
-            bool status = false;
-
-            // Retorna o AlertDialog dentro de um StatefulBuilder
-            return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setStateDialog) {
-                return AlertDialog(
-                  title: Text('Confirmar'),
-                  content: Text('Tem certeza que deseja atualizar os dados?'),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: status
-                          ? null
-                          : () {
-                              Navigator.of(context).pop(); // Fecha o diálogo
-                            },
-                      child: Text(status ? " " : 'Cancelar'),
-                    ),
-                    TextButton(
-                      onPressed: status
-                          ? null
-                          : () async {
-                              // Atualiza o estado dentro do diálogo
-                              setStateDialog(() {
-                                status = true;
-                              });
-
-                              await fetchInfoForClientesAndUpdate();
-
-                              // Atualiza o estado para indicar que o processamento terminou
-                              setStateDialog(() {
-                                status = false;
-                              });
-                              print('Dados atualizados com sucesso');
-                              Navigator.of(context)
-                                  .pop(); // Fecha o diálogo após a atualização
-                            },
-                      child: Text(status ? "Processando...." : "Atualizar"),
-                    ),
-                  ],
-                );
-              },
             );
           },
         );
@@ -193,5 +163,51 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
     }
     // Retorna o CNPJ sem formatação se não tiver a quantidade correta de dígitos
     return cnpj;
+  }
+
+  void _showUpdateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        bool status = false;
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setStateDialog) {
+            return AlertDialog(
+              title: Text('Confirmar'),
+              content: Text('Tem certeza que deseja atualizar os dados?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: status
+                      ? null
+                      : () {
+                          Navigator.of(context).pop(); // Fecha o diálogo
+                        },
+                  child: Text(status ? " " : 'Cancelar', style: const TextStyle(color: Colors.amber),),
+                ),
+                TextButton(
+                  onPressed: status
+                      ? null
+                      : () async {
+                          setStateDialog(() {
+                            status = true;
+                          });
+
+                          await fetchInfoForClientesAndUpdate(context);
+
+                          setStateDialog(() {
+                            status = false;
+                          });
+                          print('Dados atualizados com sucesso');
+                          Navigator.of(context)
+                              .pop(); // Fecha o diálogo após a atualização
+                        },
+                  child: Text(status ? "Processando...." : "Atualizar",style: const TextStyle(color: Colors.amber),),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }

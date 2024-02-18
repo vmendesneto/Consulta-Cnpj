@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
-import '../carregar_cnpj.dart';
+import 'carregar_cnpj.dart';
 import '../entrada_excel/import_excel.dart';
 
 class loteScreen extends StatefulWidget {
@@ -12,10 +12,10 @@ class loteScreen extends StatefulWidget {
 
 class _loteScreenState extends State<loteScreen> {
   String _texto = "Insira um arquivo excel com as seguintes caracteristicas:\n"
-      "Os CNPJ deveram estar na primeira planilha \n"
-      " e primeira coluna,"
+      "Os CNPJ deveram estar na primeira planilha "
+      "e primeira coluna,\n"
       "conforme imagem abaixo: \n\n"
-      "*Não há limite de linhas.";
+      "***Não há limite de linhas.";
   bool _isUpdating = false;
   Future<bool> _pickExcelFile() async {
     // Abre o seletor de arquivos e permite apenas arquivos Excel
@@ -37,17 +37,22 @@ class _loteScreenState extends State<loteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inserir em Lote'),
+        backgroundColor: Colors.black,
+        title: const Text('Inserir em Lote',style: TextStyle(color: Colors.amber),),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_texto),
+            Text(_texto, style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
             const SizedBox(height: 20), // Espaçamento entre o texto e a imagem
             Image.asset('imagens/exemplo.png'), // Exibe a imagem
             const SizedBox(height: 20), // Espaçamento entre a imagem e o botão
             ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.black, // Cor de fundo do botão
+                  onPrimary: Colors.amber, // Cor do texto e ícones do botão
+                ),
               onPressed: _isUpdating
                   ? null
                   : () async {
@@ -56,7 +61,7 @@ class _loteScreenState extends State<loteScreen> {
                 });
                 bool filePicked = await _pickExcelFile();
                 if (filePicked) {
-                  await fetchInfoForClientesAndUpdate();
+                  await fetchInfoForClientesAndUpdate(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text(
@@ -74,7 +79,7 @@ class _loteScreenState extends State<loteScreen> {
               },
               child: Text(_isUpdating
                   ? 'Processando.....'
-                  : 'Selecionar o Arquivo Excel'),
+                  : 'Selecionar o Arquivo Excel',style: const TextStyle(color: Colors.amber)),
             ),
           ],
         ),

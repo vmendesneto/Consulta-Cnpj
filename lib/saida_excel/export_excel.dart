@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:excel/excel.dart';
-
+import 'package:external_path/external_path.dart';
 import '../banco_dados/bd.dart';
 import '../model/cnpj_model.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 Future<void> exportarClientesParaExcel() async {
   final List<Cliente> clientes = await DatabaseHelper.instance.getClientes();
@@ -16,12 +17,12 @@ Future<void> exportarClientesParaExcel() async {
     "Razão Social",
     "Nome Fantasia",
     "Natureza Jurídica",
+    "Tipo de Logradouro",
     "Logradouro",
     "Número",
     "Bairro",
     "Município",
     "UF",
-    "Tipo de Logradouro",
     "CEP",
     "Identificador Matriz/Filial",
     "Início Atividade",
@@ -37,12 +38,12 @@ Future<void> exportarClientesParaExcel() async {
       cliente.razaoSocial,
       cliente.nomeFantasia,
       cliente.naturezaJuridica,
+      cliente.tipoLogradouro,
       cliente.logradouro,
       cliente.numero,
       cliente.bairro,
       cliente.municipio,
       cliente.uf,
-      cliente.tipoLogradouro,
       cliente.cep,
       cliente.identificadorMatrizFilial,
       cliente.inicioAtividade,
@@ -51,15 +52,21 @@ Future<void> exportarClientesParaExcel() async {
     ];
     sheetObject.appendRow(row);
   }
+  var status = await Permission.storage.request();
+  if (status.isGranted) {
+    // Obtém o caminho da pasta Downloads
+    String downloadsDirectory = await ExternalPath
+        .getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+    String filePath = '$downloadsDirectory/clientes.xlsx';
 
-  // Salvar o arquivo Excel
-  Directory? dir = await getExternalStorageDirectory();
-  String filePath = "${dir!.path}/clientes.xlsx";
+    // Salva o arquivo no diretório escolhido
+    File file = File(filePath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(excel.save()!);
 
-  // Salva o arquivo no diretório escolhido
-  File file = File(filePath)
-    ..createSync(recursive: true)
-    ..writeAsBytesSync(excel.save()!);
-
-  print("Arquivo Excel salvo em $filePath");
+    print('Arquivo salvo em: $filePath');
+  } else {
+    // Handle the permission denied error
+    print('Permissão negada');
+  }
 }

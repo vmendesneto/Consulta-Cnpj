@@ -2,7 +2,7 @@ import 'package:excel/excel.dart';
 import 'dart:io';
 
 import '../banco_dados/bd.dart';
-import '../carregar_cnpj.dart';
+import '../screen/carregar_cnpj.dart';
 import '../model/cnpj_model.dart';
 
 Future importExcel(File file) async {

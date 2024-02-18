@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import '../banco_dados/bd.dart';
-import '../carregar_cnpj.dart';
+import 'carregar_cnpj.dart';
 import '../model/cnpj_model.dart';
 import 'clientes_screen.dart';
 import 'lote_screen.dart';
@@ -22,7 +22,8 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Consultar Cnpj na Receita'),
+        backgroundColor: Colors.black,
+        title: const Text('Consultar Cnpj na Receita', style: TextStyle(color: Colors.amber),),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -36,10 +37,28 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                     child: TextFormField(
                       controller: _cnpjController,
                       keyboardType: TextInputType.number,
+                      cursorColor: Colors.black,
                       decoration: const InputDecoration(
                         hintText: 'Digite um CNPJ',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.amber, // Cor padrão da borda
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.amber, // Cor da borda habilitada
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.amber, // Cor da borda em foco
+                            width: 2.0,
+                          ),
+                        ),
                       ),
+
                       validator: (value) {
                         // Remove os caracteres não numéricos para validar
                         String digits = value!.replaceAll(RegExp(r'\D'), '');
@@ -52,6 +71,10 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.black, // Cor de fundo do botão
+                      onPrimary: Colors.amber, // Cor do texto e ícones do botão
+                    ),
                     onPressed: _isInsert
                         ? null
                         : () async {
@@ -64,14 +87,18 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                         String cnpj = _cnpjController.text.replaceAll(".", "")
                             .replaceAll("/", "")
                             .replaceAll("-", "");
-                        await DatabaseHelper.instance.insertCnpj(
-                            Cliente(cnpj: cnpj));
-                        await fetchInfoForClientesAndUpdate();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text(
-                                  'CNPJ inserido e atualizado com sucesso!')),
-                        );
+                        if (validarCNPJ(cnpj)) {
+                          await DatabaseHelper.instance.insertCnpj(
+                              Cliente(cnpj: cnpj));
+                          await fetchInfoForClientesAndUpdate(context);
+                          _cnpjController.text= "";
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content:
+                            Text('CNPJ Inválido'),
+                            duration: Duration(seconds: 4),
+                          ));
+                        }
                         setState(() {
                           _isInsert = false;
                         });
@@ -95,6 +122,10 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
 
             const SizedBox(height: 20),
             ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.black, // Cor de fundo do botão
+                  onPrimary: Colors.amber, // Cor do texto e ícones do botão
+                ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -111,6 +142,10 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.black, // Cor de fundo do botão
+                onPrimary: Colors.amber, // Cor do texto e ícones do botão
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -124,5 +159,36 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
       ),
     );
   }
+  bool validarCNPJ(String cnpj) {
+    // Remove caracteres não numéricos
+    var numeros = cnpj.replaceAll(RegExp(r'\D'), '');
 
+    if (numeros.length != 14) return false;
+
+    // Lista com os pesos para calcular o primeiro dígito verificador
+    var pesos1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+    // Lista com os pesos para calcular o segundo dígito verificador
+    var pesos2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+    // Calcula o primeiro dígito verificador
+    var soma1 = 0;
+    for (var i = 0; i < 12; i++) {
+      soma1 += int.parse(numeros[i]) * pesos1[i];
+    }
+    var resto1 = soma1 % 11;
+    var dv1 = resto1 < 2 ? 0 : 11 - resto1;
+
+    if (int.parse(numeros[12]) != dv1) return false;
+
+    // Calcula o segundo dígito verificador
+    var soma2 = 0;
+    for (var i = 0; i < 13; i++) {
+      soma2 += int.parse(numeros[i]) * pesos2[i];
+    }
+    var resto2 = soma2 % 11;
+    var dv2 = resto2 < 2 ? 0 : 11 - resto2;
+
+    return int.parse(numeros[13]) == dv2;
+  }
 }

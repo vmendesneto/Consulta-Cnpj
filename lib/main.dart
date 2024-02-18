@@ -56,10 +56,11 @@ class OfflineScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Offline'),
+        backgroundColor: Colors.black,
+        title: const Text('Offline',style: TextStyle(color: Colors.amber, fontSize: 40),),
       ),
       body: const Center(
-        child: Text('Você está offline. Por favor, verifique sua conexão.'),
+        child: Text('Você está offline. Por favor, verifique sua conexão.',style: TextStyle(fontSize: 40),textAlign: TextAlign.center,),
       ),
     );
   }
