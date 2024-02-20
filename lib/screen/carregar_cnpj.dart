@@ -48,6 +48,7 @@ Future<void> fetchInfoForClientesAndUpdate(BuildContext context) async {
   }
 }
 
+
 Future<void> updateSituacao(Cliente cliente) async {
   final db = await DatabaseHelper.instance.database;
 

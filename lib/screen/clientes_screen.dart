@@ -98,14 +98,14 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
           onPressed: () async {
             await exportarClientesParaExcel();
             // Exibir uma mensagem de confirmação, se desejar
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Clientes exportados em Excel na pasta Downloads com sucesso!')),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   const SnackBar(
+            //       content: Text('Clientes exportados em Excel na pasta Downloads com sucesso!')),
+            // );
           },
-          tooltip: 'Exportar para Excel',
+          tooltip: 'Compartilhar',
           child: const Icon(
-            Icons.download,
+            Icons.share,
             color: Colors.amber,
           ),
         ));
@@ -197,9 +197,13 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
                           setStateDialog(() {
                             status = false;
                           });
-                          print('Dados atualizados com sucesso');
                           Navigator.of(context)
                               .pop(); // Fecha o diálogo após a atualização
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'CNPJs atualizados com sucesso!')),
+                          );
                         },
                   child: Text(status ? "Processando...." : "Atualizar",style: const TextStyle(color: Colors.amber),),
                 ),

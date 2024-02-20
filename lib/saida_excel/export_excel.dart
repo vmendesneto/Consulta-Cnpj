@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:excel/excel.dart';
-import 'package:external_path/external_path.dart';
+import 'package:share_plus/share_plus.dart';
 import '../banco_dados/bd.dart';
 import '../model/cnpj_model.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -52,21 +52,21 @@ Future<void> exportarClientesParaExcel() async {
     ];
     sheetObject.appendRow(row);
   }
-  var status = await Permission.storage.request();
-  if (status.isGranted) {
-    // Obtém o caminho da pasta Downloads
-    String downloadsDirectory = await ExternalPath
-        .getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
-    String filePath = '$downloadsDirectory/clientes.xlsx';
+  var bytes = excel.save();
 
-    // Salva o arquivo no diretório escolhido
-    File file = File(filePath)
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(excel.save()!);
+  // Obtém o diretório temporário
+  final directory = await getTemporaryDirectory();
+  final path = '${directory.path}/clientes.xlsx';
 
-    print('Arquivo salvo em: $filePath');
-  } else {
-    // Handle the permission denied error
-    print('Permissão negada');
-  }
+  // Cria um arquivo temporário e escreve os bytes do Excel
+  File file = File(path)
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(bytes!);
+
+  // Compartilha o arquivo Excel
+  Share.shareFiles([file.path], text: 'Clientes.xlsx');
+
+  // Opcional: Remove o arquivo temporário após o compartilhamento
+  // await file.delete();
 }
+

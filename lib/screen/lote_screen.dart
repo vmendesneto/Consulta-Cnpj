@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
+import '../lote_excel/lote_excel.dart';
 import 'carregar_cnpj.dart';
 import '../entrada_excel/import_excel.dart';
 
@@ -61,7 +62,7 @@ class _loteScreenState extends State<loteScreen> {
                 });
                 bool filePicked = await _pickExcelFile();
                 if (filePicked) {
-                  await fetchInfoForClientesAndUpdate(context);
+                  await fetchInfoForClientesAndUpdateLote(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text(
