@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../admob/keys.dart';
 import '../banco_dados/bd.dart';
 import 'carregar_cnpj.dart';
 import '../model/cnpj_model.dart';
@@ -13,21 +15,34 @@ class ExcelImportScreen extends StatefulWidget {
 
 class _ExcelImportScreenState extends State<ExcelImportScreen> {
   bool _isInsert = false;
-
+  InterstitialAd? _interstitialAd;
   // Criando o controller com a máscara de CNPJ
   var _cnpjController = MaskedTextController(mask: '00.000.000/0000-00');
 
+  @override
+  void initState() {
+    super.initState();
+    myBanner.load();
+    createInterstitialAd();
+  }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _interstitialAd?.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text('Consultar Cnpj na Receita', style: TextStyle(color: Colors.amber),),
+        title: const Text(
+          'Consultar Cnpj na Receita', style: TextStyle(color: Colors.amber),),
       ),
       body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          // mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -72,8 +87,9 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                   const SizedBox(width: 8),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.black, // Cor de fundo do botão
-                      onPrimary: Colors.amber, // Cor do texto e ícones do botão
+                      foregroundColor: Colors.amber,
+                      backgroundColor: Colors
+                          .black, // Cor do texto e ícones do botão
                     ),
                     onPressed: _isInsert
                         ? null
@@ -91,13 +107,14 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                           await DatabaseHelper.instance.insertCnpj(
                               Cliente(cnpj: cnpj));
                           await fetchInfoForClientesAndUpdate(context);
-                          _cnpjController.text= "";
+                          _cnpjController.text = "";
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content:
-                            Text('CNPJ Inválido'),
-                            duration: Duration(seconds: 4),
-                          ));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                Text('CNPJ Inválido'),
+                                duration: Duration(seconds: 4),
+                              ));
                         }
                         setState(() {
                           _isInsert = false;
@@ -122,10 +139,10 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
 
             const SizedBox(height: 20),
             ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.black, // Cor de fundo do botão
-                  onPrimary: Colors.amber, // Cor do texto e ícones do botão
-                ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.amber,
+                backgroundColor: Colors.black, // Cor do texto e ícones do botão
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -143,10 +160,11 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.black, // Cor de fundo do botão
-                onPrimary: Colors.amber, // Cor do texto e ícones do botão
+                foregroundColor: Colors.amber,
+                backgroundColor: Colors.black, // Cor do texto e ícones do botão
               ),
               onPressed: () {
+                showInterstitialAd();
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ClientesInfoScreen()),
@@ -154,11 +172,24 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
               },
               child: const Text('Ver Todos os CNPJ salvos'),
             ),
+            const SizedBox(height: 110),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                color: Colors.transparent,
+                width: 320,
+                height: 100,
+                child: AdWidget(
+                  ad: myBanner,
+                ),
+              ),
+            )
           ],
         ),
       ),
     );
   }
+
   bool validarCNPJ(String cnpj) {
     // Remove caracteres não numéricos
     var numeros = cnpj.replaceAll(RegExp(r'\D'), '');
@@ -190,5 +221,42 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
     var dv2 = resto2 < 2 ? 0 : 11 - resto2;
 
     return int.parse(numeros[13]) == dv2;
+  }
+
+  final BannerAd myBanner = BannerAd(
+    adUnitId: Keys().banner,
+    size: AdSize.largeBanner,
+    request: const AdRequest(),
+    listener: const BannerAdListener(),
+  );
+
+  void createInterstitialAd() {
+    InterstitialAd.load(
+        adUnitId: Keys().interstitial,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (InterstitialAd ad) {
+            // Keep a reference to the ad so you can show it later.
+            this._interstitialAd = ad;
+          },
+          onAdFailedToLoad: (LoadAdError error) {},
+        ));
+  }
+
+  void showInterstitialAd() {
+    if (_interstitialAd == null) {
+      print("Anuncio NULO");
+      return;
+    }
+    _interstitialAd?.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (InterstitialAd ad) {
+        ad.dispose();
+      },
+      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+        ad.dispose();
+      },
+    );
+    _interstitialAd?.show();
+    _interstitialAd = null;
   }
 }

@@ -1,10 +1,12 @@
 import 'dart:async';
-
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:consulta_cnpj/screen/import_excel_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
   runApp( MyApp(),
   );
 }

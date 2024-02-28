@@ -3,7 +3,6 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
 import '../lote_excel/lote_excel.dart';
-import 'carregar_cnpj.dart';
 import '../entrada_excel/import_excel.dart';
 
 class loteScreen extends StatefulWidget {
@@ -51,8 +50,7 @@ class _loteScreenState extends State<loteScreen> {
             const SizedBox(height: 20), // Espaçamento entre a imagem e o botão
             ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.black, // Cor de fundo do botão
-                  onPrimary: Colors.amber, // Cor do texto e ícones do botão
+                  foregroundColor: Colors.black, backgroundColor: Colors.amber , // Cor do texto e ícones do botão
                 ),
               onPressed: _isUpdating
                   ? null
@@ -80,7 +78,7 @@ class _loteScreenState extends State<loteScreen> {
               },
               child: Text(_isUpdating
                   ? 'Processando.....'
-                  : 'Selecionar o Arquivo Excel',style: const TextStyle(color: Colors.amber)),
+                  : 'Selecionar o Arquivo Excel',style: const TextStyle(color: Colors.black)),
             ),
           ],
         ),

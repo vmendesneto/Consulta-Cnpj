@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../banco_dados/bd.dart';
 import 'carregar_cnpj.dart';
 import '../model/cnpj_model.dart';
@@ -12,12 +13,16 @@ class ClientesInfoScreen extends StatefulWidget {
 class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
   late Future<List<Cliente>> futureClientes;
 
+
+
+
   @override
   void initState() {
-    super.initState();
     futureClientes = DatabaseHelper.instance
         .getClientes(); // Substitua pelo seu método de busca
+    super.initState();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -69,15 +74,14 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
                     subtitle: Text(
                       'Razão Social: ${cliente.razaoSocial ?? "Não informado"}\n'
                       'Nome Fantasia: ${cliente.nomeFantasia ?? "Não informado"}\n'
-                      'Natureza Jurídica: ${cliente.naturezaJuridica ?? "Não informado"}\n'
-                      'Logradouro: ${cliente.logradouro ?? "Não informado"}, Nº ${cliente.numero ?? ""}\n'
+                      'Logradouro: ${cliente.tipoLogradouro ?? ""} ${cliente.logradouro ?? "Não informado"}, Nº ${cliente.numero ?? ""}\n'
                       'Bairro: ${cliente.bairro ?? "Não informado"}\n'
                       'Município: ${cliente.municipio ?? "Não informado"} - UF: ${cliente.uf ?? "Não informado"}\n'
                       'CEP: ${cliente.cep ?? "Não informado"}\n'
-                      'Tipo de Logradouro: ${cliente.tipoLogradouro ?? "Não informado"}\n'
-                      'Identificador Matriz/Filial: ${cliente.identificadorMatrizFilial}\n'
-                      'Início Atividade: ${cliente.inicioAtividade ?? "Não informado"}\n'
                       'Situação Cadastral: ${cliente.situacaoCadastral ?? "Não informado"}\n'
+                      'Identificador Matriz/Filial: ${cliente.identificadorMatrizFilial}\n'
+                      'Natureza Jurídica: ${cliente.naturezaJuridica ?? "Não informado"}\n'
+                      'Início Atividade: ${cliente.inicioAtividade ?? "Não informado"}\n'
                       'Data Atualização: ${cliente.dataCadastro ?? "Não informado"}',
                       style: const TextStyle(color: Colors.black54),
                     ),
@@ -214,4 +218,6 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
       },
     );
   }
+
+
 }
