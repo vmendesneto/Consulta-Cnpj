@@ -14,7 +14,7 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
   late Future<List<Cliente>> futureClientes;
 
 
-
+  InterstitialAd? _interstitialAd;
 
   @override
   void initState() {
@@ -22,7 +22,6 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
         .getClientes(); // Substitua pelo seu método de busca
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {

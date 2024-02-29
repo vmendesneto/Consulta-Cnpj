@@ -16,22 +16,19 @@ class ExcelImportScreen extends StatefulWidget {
 class _ExcelImportScreenState extends State<ExcelImportScreen> {
   bool _isInsert = false;
   InterstitialAd? _interstitialAd;
+
   // Criando o controller com a máscara de CNPJ
   var _cnpjController = MaskedTextController(mask: '00.000.000/0000-00');
 
   @override
   void initState() {
-    super.initState();
     myBanner.load();
     createInterstitialAd();
+    super.initState();
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    _interstitialAd?.dispose();
-  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -177,8 +174,8 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
               alignment: Alignment.bottomCenter,
               child: Container(
                 color: Colors.transparent,
-                width: 320,
-                height: 100,
+                width: 300,
+                height: 250,
                 child: AdWidget(
                   ad: myBanner,
                 ),
@@ -225,9 +222,17 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
 
   final BannerAd myBanner = BannerAd(
     adUnitId: Keys().banner,
-    size: AdSize.largeBanner,
+    size: AdSize.mediumRectangle,
     request: const AdRequest(),
-    listener: const BannerAdListener(),
+    listener: BannerAdListener(
+      onAdLoaded: (Ad ad) {
+        print('Anúncio carregado.');
+      },
+      onAdFailedToLoad: (Ad ad, LoadAdError error) {
+        print('Anúncio falhou ao carregar: $error');
+      },
+      // Outros callbacks conforme necessário...
+    ),
   );
 
   void createInterstitialAd() {
@@ -236,16 +241,34 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
         request: const AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (InterstitialAd ad) {
-            // Keep a reference to the ad so you can show it later.
+            // Mantém uma referência ao anúncio para que possa ser mostrado mais tarde.
             this._interstitialAd = ad;
+            print("Anúncio intersticial carregado");
+            // Defina aqui o callback para quando o anúncio for dispensado
+            _interstitialAd?.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (InterstitialAd ad) {
+                ad.dispose();
+                // Carregue um novo anúncio para o próximo uso.
+                createInterstitialAd();
+              },
+              onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+                print("Falha ao exibir o anúncio intersticial: $error");
+                ad.dispose();
+                // Você pode optar por tentar carregar um novo anúncio aqui também.
+              },
+            );
           },
-          onAdFailedToLoad: (LoadAdError error) {},
+          onAdFailedToLoad: (LoadAdError error) {
+            print("Falha ao carregar o anúncio intersticial: $error");
+            // Tratar falha no carregamento, pode-se tentar recarregar aqui também
+          },
         ));
   }
 
   void showInterstitialAd() {
     if (_interstitialAd == null) {
-      print("Anuncio NULO");
+      print("Anúncio intersticial não está pronto ainda.");
+      createInterstitialAd(); // Tenta carregar um novo anúncio se o atual for nulo
       return;
     }
     _interstitialAd?.fullScreenContentCallback = FullScreenContentCallback(

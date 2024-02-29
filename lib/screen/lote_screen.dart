@@ -16,6 +16,7 @@ class _loteScreenState extends State<loteScreen> {
       "e primeira coluna,\n"
       "conforme imagem abaixo: \n\n"
       "***Não há limite de linhas.";
+  bool _estaProcessando = false;
   bool _isUpdating = false;
   Future<bool> _pickExcelFile() async {
     // Abre o seletor de arquivos e permite apenas arquivos Excel
@@ -35,7 +36,12 @@ class _loteScreenState extends State<loteScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return  WillPopScope(
+        onWillPop: () async {
+      // Se estiver processando, impede o retorno.
+      return !_estaProcessando;
+    },
+    child:Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text('Inserir em Lote',style: TextStyle(color: Colors.amber),),
@@ -57,6 +63,7 @@ class _loteScreenState extends State<loteScreen> {
                   : () async {
                 setState(() {
                   _isUpdating = true;
+                  _estaProcessando = true;
                 });
                 bool filePicked = await _pickExcelFile();
                 if (filePicked) {
@@ -68,10 +75,12 @@ class _loteScreenState extends State<loteScreen> {
                   );
                   setState(() {
                     _isUpdating = false;
+                    _estaProcessando = false;
                   });
                 } else {
                   setState(() {
                     _isUpdating = false;
+                    _estaProcessando = false;
                   });
                 }
                 Navigator.of(context).pop();
@@ -83,6 +92,6 @@ class _loteScreenState extends State<loteScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 }
