@@ -1,10 +1,21 @@
 import 'package:excel/excel.dart';
+import 'package:flutter/cupertino.dart';
 import 'dart:io';
 
 import '../banco_dados/bd.dart';
 import '../model/cnpj_model.dart';
 
+// Definindo o ValueNotifier globalmente para ser acessado e modificado por diferentes partes do código.
+ValueNotifier<int> carregarNotifier = ValueNotifier<int>(0);
+
+class carregar {
+  int get count => carregarNotifier.value;
+  set count(int newValue) {
+    carregarNotifier.value = newValue;
+  }
+}
 Future importExcel(File file) async {
+  if (file.path.endsWith('.xlsx')) {
   var bytes = file.readAsBytesSync();
   var excel = Excel.decodeBytes(bytes);
 
@@ -38,6 +49,12 @@ Future importExcel(File file) async {
         // CNPJ contém letras, considerar inválido
         print("CNPJ inválido encontrado (contém letras): $cnpj");
       }
+      carregarNotifier.value += 1;
     }
   }
-}
+}else{
+
+    print("Arquivo não suportado. Por favor, selecione um arquivo .xlsx.");
+    return false;
+  }
+  }

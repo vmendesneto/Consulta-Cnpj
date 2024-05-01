@@ -25,7 +25,7 @@ class DatabaseHelper {
   static final String columnIdentificadorMatrizFilial =
       'identificadorMatrizFilial';
   static final String columnInicioAtividade = 'inicioAtividade';
-
+  static final String columnDataBusca = 'dataBusca';
   // Torna esta classe singleton
   DatabaseHelper._privateConstructor();
 
@@ -61,7 +61,8 @@ class DatabaseHelper {
           $columnUf TEXT,
           $columnCep TEXT,
           $columnIdentificadorMatrizFilial TEXT,
-          $columnInicioAtividade TEXT
+          $columnInicioAtividade TEXT,
+          $columnDataBusca TEXT
         )
         ''');
   }
@@ -111,6 +112,7 @@ class DatabaseHelper {
         inicioAtividade: maps[i]['inicioAtividade'],
         situacaoCadastral: maps[i]['situacaoCadastral'],
         dataCadastro: maps[i]['dataCadastral'],
+        dataBusca: maps[i]['dataBusca'],
       );
     });
   }

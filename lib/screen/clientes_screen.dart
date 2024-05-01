@@ -38,8 +38,18 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
                 Icons.refresh,
                 color: Colors.amber,
               ),
-              onPressed: () => _showUpdateDialog(context),
-            ),
+              onPressed: () {
+                _showUpdateDialog(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text(
+                          'CNPJs atualizados com sucesso!')),
+                );
+                futureClientes = DatabaseHelper.instance
+                    .getClientes();
+              }
+
+    ),
             PopupMenuButton<int>(
               color: Colors.amber,
               onSelected: (item) => onSelected(context, item),
@@ -81,7 +91,8 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
                       'Identificador Matriz/Filial: ${cliente.identificadorMatrizFilial}\n'
                       'Natureza Jurídica: ${cliente.naturezaJuridica ?? "Não informado"}\n'
                       'Início Atividade: ${cliente.inicioAtividade ?? "Não informado"}\n'
-                      'Data Atualização: ${cliente.dataCadastro ?? "Não informado"}',
+                      'Data Atualização: ${cliente.dataCadastro ?? "Não informado"}\n'
+                      'Data Pesquisa: ${cliente.dataBusca.toString()}',
                       style: const TextStyle(color: Colors.black54),
                     ),
                     isThreeLine: true, // Permitir múltiplas linhas no subtitle
@@ -194,19 +205,12 @@ class _ClientesInfoScreenState extends State<ClientesInfoScreen> {
                           setStateDialog(() {
                             status = true;
                           });
-
                           await fetchInfoForClientesAndUpdate(context);
-
                           setStateDialog(() {
                             status = false;
                           });
                           Navigator.of(context)
                               .pop(); // Fecha o diálogo após a atualização
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'CNPJs atualizados com sucesso!')),
-                          );
                         },
                   child: Text(status ? "Processando...." : "Atualizar",style: const TextStyle(color: Colors.amber),),
                 ),

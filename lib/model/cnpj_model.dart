@@ -14,6 +14,7 @@ class Cliente {
   final String? cep;
   final String? identificadorMatrizFilial;
   final String? inicioAtividade;
+  final String? dataBusca;
 
   Cliente({
     required this.cnpj,
@@ -31,6 +32,7 @@ class Cliente {
     this.cep,
     this.identificadorMatrizFilial,
     this.inicioAtividade,
+    this.dataBusca,
   });
 
   Map<String, dynamic> toMap() {
@@ -54,10 +56,11 @@ class Cliente {
       'identificadorMatrizFilial': identificadorMatrizFilial,
       // Usando "descricao_identificador_matriz_filial"
       'inicioAtividade': inicioAtividade,
+      'dataBusca': dataBusca.toString(),
     };
   }
 
-  // Construtor factory para criar um Cliente a partir de um Map<String, dynamic>
+  //FROMMAP QUANDO RECEBO O JSON
   factory Cliente.fromMap(Map<String, dynamic> map) {
     return Cliente(
       cnpj: map['cnpj'],
@@ -75,6 +78,41 @@ class Cliente {
       cep: map['cep'],
       identificadorMatrizFilial: map['descricao_identificador_matriz_filial'],
       inicioAtividade: map['data_inicio_atividade'],
+    );
+  }
+//FROMMAP QUANDO LEIO OS DADOS DO BANCO
+  factory Cliente.fromMap2(Map<String, dynamic> map) {
+    return Cliente(
+      cnpj: map['cnpj'],
+      situacaoCadastral: map['situacaoCadastral'],
+      // Ajustado para corresponder ao mapa
+      dataCadastro: map['dataCadastral'],
+      // Ajustado para corresponder ao mapa
+      razaoSocial: map['razaoSocial'],
+      // Ajustado para corresponder ao mapa
+      nomeFantasia: map['nomeFantasia'],
+      // Ajustado para corresponder ao mapa
+      naturezaJuridica: map['naturezaJuridica'],
+      // Ajustado para corresponder ao mapa
+      logradouro: map['logradouro'],
+      // Ajustado para corresponder ao mapa
+      numero: map['numero'],
+      // Ajustado para corresponder ao mapa
+      bairro: map['bairro'],
+      // Ajustado para corresponder ao mapa
+      municipio: map['municipio'],
+      // Ajustado para corresponder ao mapa
+      uf: map['uf'],
+      // Ajustado para corresponder ao mapa
+      tipoLogradouro: map['tipoLogradouro'],
+      // Ajustado para corresponder ao mapa
+      cep: map['cep'],
+      // Ajustado para corresponder ao mapa
+      identificadorMatrizFilial: map['identificadorMatrizFilial'],
+      // Ajustado para corresponder ao mapa
+      inicioAtividade: map['inicioAtividade'],
+      // Ajustado para corresponder ao mapa
+      dataBusca: map['dataBusca'], // Ajustado para corresponder ao mapa
     );
   }
 }

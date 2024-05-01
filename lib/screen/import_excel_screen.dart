@@ -3,7 +3,7 @@ import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../admob/keys.dart';
 import '../banco_dados/bd.dart';
-import 'carregar_cnpj.dart';
+import '../lote_excel/lote_excel.dart';
 import '../model/cnpj_model.dart';
 import 'clientes_screen.dart';
 import 'lote_screen.dart';
@@ -26,7 +26,6 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
     createInterstitialAd();
     super.initState();
   }
-
 
 
   @override
@@ -103,7 +102,7 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                         if (validarCNPJ(cnpj)) {
                           await DatabaseHelper.instance.insertCnpj(
                               Cliente(cnpj: cnpj));
-                          await fetchInfoForClientesAndUpdate(context);
+                          await fetchInfoCnpj(context, cnpj);
                           _cnpjController.text = "";
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(

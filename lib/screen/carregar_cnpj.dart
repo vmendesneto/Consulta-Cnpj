@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../banco_dados/bd.dart';
 import '../model/cnpj_model.dart';
+import 'package:intl/intl.dart';
 
 Future<List<Cliente>> fetchClientes() async {
   final db = await DatabaseHelper.instance.database;
@@ -26,12 +27,12 @@ Future<void> fetchInfoForClientesAndUpdate(BuildContext context) async {
     if (response.statusCode == 200) {
       var data = jsonDecode(utf8.decode(response.bodyBytes));
       Cliente updatedCliente = Cliente.fromMap(data);
-      await updateSituacao(updatedCliente);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(
-                'CNPJ inserido e atualizado com sucesso!')),
-      );
+      var clienteMap = updatedCliente.toMap();
+      String formattedDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
+      clienteMap['dataBusca'] = formattedDate;
+      Cliente t = Cliente.fromMap2(clienteMap);
+
+      await updateSituacao(t);
     } else if (response.statusCode == 400) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content:
@@ -45,13 +46,13 @@ Future<void> fetchInfoForClientesAndUpdate(BuildContext context) async {
         duration: const Duration(seconds: 4),
       ));
     }
+
   }
 }
 
 
 Future<void> updateSituacao(Cliente cliente) async {
   final db = await DatabaseHelper.instance.database;
-
   await db.update(
     'cliente_table',
     cliente.toMap(),
